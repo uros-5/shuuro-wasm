@@ -18,6 +18,7 @@ extern "C" {
     fn alert(s: &str);
 }
 
+/// Class for ShuuroShop
 #[wasm_bindgen]
 pub struct ShuuroShop {
     shuuro: shuuro::Shop,
@@ -31,6 +32,8 @@ impl ShuuroShop {
             shuuro: shuuro::Shop::default(),
         }
     }
+
+    /// Buying piece. game_move is in this format `+P`. Returns Uint8Array
     #[wasm_bindgen]
     pub fn buy(&mut self, game_move: String) -> Uint8Array {
         if let Some(game_move) = Move::from_sfen(game_move.as_str()) {
@@ -45,6 +48,7 @@ impl ShuuroShop {
         Uint8Array::new_with_length(7)
     }
 
+    /// Confirm players hand. s is color. It can be 'w' or 'b'.
     #[wasm_bindgen]
     pub fn confirm(&mut self, s: char) {
         let color = Color::from_char(s);
@@ -59,8 +63,9 @@ impl ShuuroShop {
         }
     }
 
+    /// Get credit for selected player.
     #[wasm_bindgen]
-    pub fn getCredit(&self, s: char) -> i32 {
+    pub fn get_credit(&self, s: char) -> i32 {
         let color = Color::from_char(s);
         match color {
             Some(c) => match c {
@@ -72,8 +77,9 @@ impl ShuuroShop {
         }
     }
 
+    /// Check if selected player if confirmed.
     #[wasm_bindgen]
-    pub fn isConfirmed(&self, s: char) -> bool {
+    pub fn is_confirmed(&self, s: char) -> bool {
         let color = Color::from_char(s);
         match color {
             Some(c) => match c {
@@ -85,6 +91,7 @@ impl ShuuroShop {
         }
     }
 
+    /// Count all items for selected player.
     #[wasm_bindgen]
     pub fn shop_items(&self, s: char) -> Uint8Array {
         let color = Color::from_char(s);
@@ -120,6 +127,7 @@ impl ShuuroShop {
         array
     }
 
+    /// Get counter for selected piece.
     #[wasm_bindgen]
     pub fn get_piece(&self, s: char) -> u8 {
         let piece = shuuro::Piece::from_sfen(s);
@@ -131,11 +139,13 @@ impl ShuuroShop {
         }
     }
 
+    /// Set hand for all players.
     #[wasm_bindgen]
     pub fn set_hand(&mut self, hand: &str) {
         self.shuuro.set_hand(&hand);
     }
 
+    /// All moves for player in sfen format: [{"+k", 0}, ...]
     #[wasm_bindgen]
     pub fn history(&self) -> Array {
         let ar = Array::new();
@@ -190,12 +200,13 @@ impl ShuuroPosition {
         self.shuuro.side_to_move().to_string()
     }
 
+    /// All plinths on board.
     #[wasm_bindgen]
     pub fn map_plinths(&self) -> Map {
         let list = Map::new();
         let bb = self.shuuro.player_bb(Color::NoColor);
         for i in bb.clone() {
-            let example = Example {
+            let example = P {
                 role: String::from("l-piece"),
                 color: String::from("white"),
             };
@@ -210,6 +221,7 @@ impl ShuuroPosition {
         list
     }
 
+    /// All pieces on board.
     #[wasm_bindgen]
     pub fn map_pieces(&self) -> Map {
         let list = Map::new();
@@ -221,7 +233,7 @@ impl ShuuroPosition {
                 let piece = self.shuuro.piece_at(sq);
                 if let Some(piece) = piece {
                     let sq = sq.to_string();
-                    let p = Example {
+                    let p = P {
                         role: format!(
                             "{}-piece",
                             piece.to_string().as_str().to_lowercase().as_str()
@@ -253,6 +265,7 @@ impl ShuuroPosition {
         self.shuuro.get_sfen_history().last().unwrap().0.clone()
     }
 
+    /// Returns if side_to_move is in check.
     #[wasm_bindgen]
     pub fn is_check(&self) -> bool {
         self.shuuro.in_check(self.shuuro.side_to_move())
@@ -286,6 +299,7 @@ impl ShuuroPosition {
         list
     }
 
+    /// Count how many pieces are left in hand.
     #[wasm_bindgen]
     pub fn count_hand_pieces(&self) -> String {
         let mut sum = String::from("");
@@ -374,22 +388,9 @@ impl ShuuroPosition {
     }
 }
 
+/// This represents piece.
 #[derive(Serialize, Deserialize)]
-pub struct Example {
+pub struct P {
     pub role: String,
     pub color: String,
-}
-
-#[wasm_bindgen]
-pub fn test() -> Map {
-    let mut list = Map::new();
-    let example = Example {
-        role: String::from("k-piece"),
-        color: String::from("white"),
-    };
-    list.set(
-        &JsValue::from_str("a1"),
-        &JsValue::from_serde(&example).unwrap(),
-    );
-    list
 }

@@ -1,5 +1,5 @@
 name = "shuuro-wasm"
-version = "0.1.1"
+version = "0.1.6"
 
 #! time interval for file changes to trigger wasm-pack build, default `50` milliseconds
 interval = 50

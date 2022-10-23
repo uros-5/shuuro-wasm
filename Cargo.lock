@@ -205,8 +205,8 @@ dependencies = [
 
 [[package]]
 name = "shuuro"
-version = "0.5.91"
-source = "git+ssh://git@github.com/uros-5/shuuro.git#cf52056079dba112ef6390ba0f28bc7b0fe07240"
+version = "0.5.94"
+source = "git+https://github.com/uros-5/shuuro?branch=fairy#9fc292a2e7d72a185aa682872ed5bcd40e75c721"
 dependencies = [
  "bitintr",
  "itertools",

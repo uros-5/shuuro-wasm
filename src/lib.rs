@@ -1,7 +1,10 @@
 mod utils;
 
+use std::fmt::format;
+
 use js_sys::{Array, Map, Uint8Array};
 use serde::{Deserialize, Serialize};
+use shuuro::piece_type::Variant;
 use shuuro::{self, piece_type::PieceTypeIter, Color, Move, Piece, PieceType, Position};
 use shuuro::{init, Square};
 use wasm_bindgen::prelude::*;
@@ -16,12 +19,16 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 extern "C" {
     fn alert(s: &str);
+
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
 }
 
 /// Class for ShuuroShop
 #[wasm_bindgen]
 pub struct ShuuroShop {
     shuuro: shuuro::Shop,
+    variant: Variant,
 }
 
 #[wasm_bindgen]
@@ -30,7 +37,15 @@ impl ShuuroShop {
     pub fn new() -> Self {
         ShuuroShop {
             shuuro: shuuro::Shop::default(),
+            variant: Variant::Normal,
         }
+    }
+
+    #[wasm_bindgen]
+    pub fn change_variant(&mut self, variant: String) {
+        let v = Variant::from(&variant);
+        self.shuuro.change_variant();
+        self.variant = v.clone();
     }
 
     /// Buying piece. game_move is in this format `+P`. Returns Uint8Array
@@ -114,17 +129,33 @@ impl ShuuroShop {
         let mut current_state: [u8; 7] = [0, 0, 0, 0, 0, 0, 0];
         let iterator = PieceTypeIter::new();
         for i in iterator {
-            if i != PieceType::King || i != PieceType::Plinth {
+            if self.variant.wrong(i.index()) {
+                continue;
+            } else if i == PieceType::King {
+                continue;
+            } else if i == PieceType::Plinth {
+                continue;
+            }
+            if i.index() != 0 || i.index() != 8 {
                 let piece = Piece {
                     piece_type: i,
                     color: *color,
                 };
+                let index = self.js_shop_index(i.index());
                 let current = self.shuuro.get(piece);
-                current_state[i.index()] = current;
-                array.set_index(i.index() as u32, current);
+                current_state[index] = current;
+                array.set_index(index as u32, current);
             }
         }
         array
+    }
+
+    fn js_shop_index(&self, index: usize) -> usize {
+        match index {
+            6 => 2,
+            7 => 3,
+            _ => index,
+        }
     }
 
     /// Get counter for selected piece.
@@ -175,6 +206,12 @@ impl ShuuroPosition {
         }
     }
     // Main functions.
+
+    /// Change game variant
+    #[wasm_bindgen]
+    pub fn change_variant(&mut self) {
+        self.shuuro.update_variant();
+    }
 
     /// Set hand for pocket.
     #[wasm_bindgen]
@@ -303,17 +340,13 @@ impl ShuuroPosition {
     #[wasm_bindgen]
     pub fn count_hand_pieces(&self) -> String {
         let mut sum = String::from("");
-        let pts = [
-            PieceType::King,
-            PieceType::Queen,
-            PieceType::Bishop,
-            PieceType::Rook,
-            PieceType::Knight,
-            PieceType::Pawn,
-        ];
         for color in Color::iter() {
             if color != Color::NoColor {
-                for piece_type in pts {
+                let iterator = PieceTypeIter::new();
+                for piece_type in iterator {
+                    if self.shuuro.variant().wrong(piece_type.index()) {
+                        continue;
+                    }
                     let piece = Piece { piece_type, color };
                     let counter = self.shuuro.hand(piece);
                     for _i in 0..counter {

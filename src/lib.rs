@@ -60,7 +60,7 @@ impl ShuuroShop {
                 _ => (),
             }
         }
-        Uint8Array::new_with_length(7)
+        Uint8Array::new_with_length(8)
     }
 
     /// Confirm players hand. s is color. It can be 'w' or 'b'.
@@ -113,7 +113,7 @@ impl ShuuroShop {
         match color {
             Some(c) => match c {
                 Color::NoColor => {
-                    return Uint8Array::new_with_length(7);
+                    return Uint8Array::new_with_length(8);
                 }
                 _ => {
                     return self.js_shop_items(&c);
@@ -121,18 +121,18 @@ impl ShuuroShop {
             },
             None => (),
         }
-        Uint8Array::new_with_length(7)
+        Uint8Array::new_with_length(8)
     }
 
     fn js_shop_items(&self, color: &Color) -> Uint8Array {
-        let array = Uint8Array::new_with_length(7);
-        let mut current_state: [u8; 7] = [0, 0, 0, 0, 0, 0, 0];
+        let array = Uint8Array::new_with_length(8);
+        let mut current_state: [u8; 8] = [1, 0, 0, 0, 0, 0, 0, 0];
         let iterator = PieceTypeIter::new();
         for i in iterator {
             if self.variant.wrong(i.index()) {
                 continue;
             } else if i == PieceType::King {
-                continue;
+                array.set_index(0, current_state[0]);
             } else if i == PieceType::Plinth {
                 continue;
             }
@@ -141,7 +141,7 @@ impl ShuuroShop {
                     piece_type: i,
                     color: *color,
                 };
-                let index = self.js_shop_index(i.index());
+                let index = i.index();
                 let current = self.shuuro.get(piece);
                 current_state[index] = current;
                 array.set_index(index as u32, current);
@@ -150,7 +150,7 @@ impl ShuuroShop {
         array
     }
 
-    fn js_shop_index(&self, index: usize) -> usize {
+    fn _js_shop_index(&self, index: usize) -> usize {
         match index {
             6 => 2,
             7 => 3,

@@ -2,7 +2,7 @@
 name = "shuuro-wasm"
 version = "0.1.7"
 authors = ["uros-5"]
-edition = "2018"
+edition = "2021"
 description = "Library for shuuro-wasm on client part."
 repository = "https://github.com/uros-5/shuuro-wasm"
 license = "Apache-2.0 license"

@@ -1,7 +1,0 @@
-{
-	"scripts": {
-	"rsw": "rsw"},
-  "devDependencies": {
-    "vite-plugin-rsw": "^2.0.9"
-  }
-}

@@ -36,7 +36,7 @@ impl ShuuroShop {
                 return self.js_shop_items(&piece.color);
             }
         }
-        Uint8Array::new_with_length(8)
+        Uint8Array::new_with_length(9)
     }
 
     /// Confirm players hand. s is color. It can be 'w' or 'b'.
@@ -94,7 +94,7 @@ impl ShuuroShop {
     }
 
     fn js_shop_items(&self, color: &Color) -> Uint8Array {
-        let array = Uint8Array::new_with_length(8);
+        let array = Uint8Array::new_with_length(9);
         let mut current_state: [u8; 8] = [1, 0, 0, 0, 0, 0, 0, 0];
         let iterator = PieceTypeIter::default();
         for i in iterator {
@@ -105,7 +105,7 @@ impl ShuuroShop {
             } else if i == PieceType::Plinth {
                 continue;
             }
-            if i.index() != 0 || i.index() != 8 {
+            if i.index() != 0 || i.index() != 9 {
                 let piece = Piece {
                     piece_type: i,
                     color: *color,

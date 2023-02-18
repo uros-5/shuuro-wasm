@@ -3,11 +3,16 @@ use serde::{Deserialize, Serialize};
 use shuuro::attacks::Attacks;
 use shuuro::shuuro12::position12::P12;
 pub use shuuro::shuuro12::{attacks12::Attacks12, bitboard12::BB12, square12::Square12};
-use shuuro::Square;
 use shuuro::{self, piece_type::PieceTypeIter, Color, Move, Piece};
 use shuuro::{position::*, Variant};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    pub fn log(s: &str);
+}
 
 #[wasm_bindgen]
 pub struct ShuuroPosition {
@@ -195,24 +200,21 @@ impl ShuuroPosition {
 
     /// All legal moves for square.
     #[wasm_bindgen]
-    pub fn legal_moves(&self, sq: &str) -> Map {
+    pub fn legal_moves(&self, color: &str) -> Map {
         let map = Map::new();
-        if let Some(square) = Square::from_sfen(&String::from(sq)) {
-            if let Some(piece) = self.shuuro.piece_at(square) {
-                if piece.color == self.shuuro.side_to_move() {
-                    let l_m = self.shuuro.legal_moves(&piece.color);
-                    for m in l_m {
-                        let piece = m.0.to_string();
-                        let moves = Array::new();
-                        for sq in m.1 {
-                            let value = JsValue::from_str(&sq.to_string()[..]);
-                            moves.push(&value);
-                        }
-                        let piece = JsValue::from_str(&piece);
-                        let moves = JsValue::from(moves);
-                        map.set(&piece, &moves);
-                    }
+        let stm = self.shuuro.side_to_move();
+        if color == stm.to_string() {
+            let l_m = self.shuuro.legal_moves(&stm);
+            for m in l_m {
+                let piece = m.0.to_string();
+                let moves = Array::new();
+                for sq in m.1 {
+                    let value = JsValue::from_str(&sq.to_string()[..]);
+                    moves.push(&value);
                 }
+                let piece = JsValue::from_str(&piece);
+                let moves = JsValue::from(moves);
+                map.set(&piece, &moves);
             }
         }
         map

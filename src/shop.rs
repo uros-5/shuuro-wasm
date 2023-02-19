@@ -27,6 +27,11 @@ impl ShuuroShop {
         self.shuuro.change_variant(&variant);
     }
 
+    #[wasm_bindgen]
+    pub fn get_variant(&self) -> String {
+        self.shuuro.variant().to_string()
+    }
+
     /// Buying piece. game_move is in this format `+P`. Returns Uint8Array
     #[wasm_bindgen]
     pub fn buy(&mut self, game_move: String) -> Uint8Array {
@@ -85,7 +90,7 @@ impl ShuuroShop {
         let color = Color::from_char(s);
         if let Some(c) = color {
             if let Color::NoColor = c {
-                return Uint8Array::new_with_length(8);
+                return Uint8Array::new_with_length(9);
             } else {
                 return self.js_shop_items(&c);
             }
@@ -95,7 +100,7 @@ impl ShuuroShop {
 
     fn js_shop_items(&self, color: &Color) -> Uint8Array {
         let array = Uint8Array::new_with_length(9);
-        let mut current_state: [u8; 8] = [1, 0, 0, 0, 0, 0, 0, 0];
+        let mut current_state: [u8; 9] = [1, 0, 0, 0, 0, 0, 0, 0, 0];
         let iterator = PieceTypeIter::default();
         for i in iterator {
             if !self.shuuro.variant().can_buy(&i) {

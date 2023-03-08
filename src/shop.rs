@@ -1,7 +1,7 @@
 use js_sys::{Array, Uint8Array};
 
 use shuuro::{
-    piece_type::PieceTypeIter, shuuro12::square12::Square12, Color, Move, Piece, PieceType,
+    piece_type::PieceTypeIter, shuuro12::square12::Square12, Color, Move, Piece, PieceType, Variant,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
@@ -24,7 +24,8 @@ impl ShuuroShop {
 
     #[wasm_bindgen]
     pub fn change_variant(&mut self, variant: String) {
-        self.shuuro.change_variant(&variant);
+        let variant = Variant::from(&variant);
+        self.shuuro.update_variant(variant);
     }
 
     #[wasm_bindgen]
@@ -154,10 +155,11 @@ impl ShuuroShop {
         let ar = Array::new();
         let history = self.shuuro.get_sfen_history(&Color::NoColor);
         for m in history {
-            let t = Array::new();
-            t.push(&JsValue::from_str(m.0.as_str()));
-            t.push(&JsValue::from(m.1));
-            ar.push(&JsValue::from(t));
+            // let t = Array::new();
+            // t.push(&JsValue::from_str(m.0.as_str()));
+            // t.push(&JsValue::from(m.1));
+            // ar.push(&JsValue::from(t));
+            ar.push(&JsValue::from_str(m.0.as_str()));
         }
         ar
     }

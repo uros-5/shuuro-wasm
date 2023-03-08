@@ -111,6 +111,11 @@ impl ShuuroPosition {
     pub fn make_move(&mut self, game_move: String) -> String {
         self.shuuro.make_move(game_move)
     }
+
+    #[wasm_bindgen]
+    pub fn variant(&self) -> String {
+        self.shuuro.variant()
+    }
 }
 
 impl Default for ShuuroPosition {

@@ -4,13 +4,21 @@ use shuuro::{
     attacks::Attacks, bitboard::BitBoard, piece_type::PieceTypeIter, position::Position, Color,
     Move, Piece, Square, Variant,
 };
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 use std::{
     hash::Hash,
     marker::PhantomData,
     ops::{BitAnd, BitOr, BitOrAssign, Not},
 };
+
+#[wasm_bindgen]
+extern "C" {
+    // Use `js_namespace` here to bind `console.log(..)` instead of just
+    // `log(..)`
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
 
 #[derive(Clone, Copy)]
 pub struct LocalPosition<S, B, A, P>

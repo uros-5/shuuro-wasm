@@ -5,7 +5,15 @@ use shuuro::shuuro12::{
 };
 use shuuro::shuuro8::{attacks8::Attacks8, bitboard8::BB8, position8::P8, square8::Square8};
 use shuuro::Variant;
+use wasm_bindgen::prelude::wasm_bindgen;
 
+#[wasm_bindgen]
+extern "C" {
+    // Use `js_namespace` here to bind `console.log(..)` instead of just
+    // `log(..)`
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
 macro_rules! local_position {
     // mutate
     ($self: ident, $method: ident, $param: expr, $mut: expr, $ret: expr) => {
@@ -82,6 +90,11 @@ impl PositionContainer {
     #[inline]
     pub fn change_variant(&mut self, variant: &str) {
         local_position!(self, change_variant, variant, true, true);
+    }
+
+    #[inline]
+    pub fn variant(&self) -> String {
+        self.variant.to_string()
     }
 
     #[inline]

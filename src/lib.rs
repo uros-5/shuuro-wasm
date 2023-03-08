@@ -1,5 +1,5 @@
 mod local_position;
-mod position;
+pub mod position;
 mod position_container;
 pub mod shop;
 

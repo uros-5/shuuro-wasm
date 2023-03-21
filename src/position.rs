@@ -62,6 +62,12 @@ impl ShuuroPosition {
         self.shuuro.map_pieces()
     }
 
+    /// Starting credit for current variant.
+    #[wasm_bindgen]
+    pub fn start_credit(&self) -> i32 {
+        self.shuuro.start_credit()
+    }
+
     /// Get piece count.
     #[wasm_bindgen]
     pub fn pieces_count(&self) -> usize {

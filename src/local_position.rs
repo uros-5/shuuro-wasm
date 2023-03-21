@@ -1,12 +1,12 @@
 use js_sys::{Array, Map};
 use serde::{Deserialize, Serialize};
 use shuuro::{
-    attacks::Attacks, bitboard::BitBoard, piece_type::PieceTypeIter, position::Position, Color,
-    Move, Piece, Square, Variant,
+    attacks::Attacks, bitboard::BitBoard, position::Position, Color, Move, Piece, Square, Variant,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 use std::{
+    format,
     hash::Hash,
     marker::PhantomData,
     ops::{BitAnd, BitOr, BitOrAssign, Not},
@@ -86,6 +86,10 @@ where
 
     pub fn side_to_move(&self) -> String {
         self.state.side_to_move().to_string()
+    }
+
+    pub fn start_credit(&self) -> i32 {
+        self.state.variant().start_credit()
     }
 
     pub fn map_plinths(&self) -> Map {
@@ -178,23 +182,9 @@ where
     }
 
     pub fn count_hand_pieces(&self) -> String {
-        let mut sum = String::from("");
-        for color in Color::iter() {
-            if color != Color::NoColor {
-                let iterator = PieceTypeIter::default();
-                for piece_type in iterator {
-                    if !self.state.variant().can_buy(&piece_type) {
-                        continue;
-                    }
-                    let piece = Piece { piece_type, color };
-                    let counter = self.state.hand(piece);
-                    for _i in 0..counter {
-                        sum.push(piece.to_string().chars().last().unwrap());
-                    }
-                }
-            }
-        }
-        sum
+        let w = self.state.get_hand(Color::White, true);
+        let b = self.state.get_hand(Color::Black, true);
+        format!("{}{}", b, w)
     }
 
     pub fn place(&mut self, game_move: String) -> bool {

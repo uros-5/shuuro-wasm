@@ -118,6 +118,11 @@ impl PositionContainer {
     }
 
     #[inline]
+    pub fn start_credit(&self) -> i32 {
+        local_position!(self, start_credit)
+    }
+
+    #[inline]
     pub fn map_plinths(&self) -> Map {
         local_position!(self, map_plinths)
     }

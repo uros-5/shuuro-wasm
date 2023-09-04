@@ -76,7 +76,7 @@ impl ShuuroPosition {
     /// Get last move.
     #[wasm_bindgen]
     pub fn last_move(&self) -> String {
-        self.shuuro.last_move()
+        self.shuuro.last_move().to_string()
     }
 
     /// Returns if side_to_move is in check.
@@ -116,6 +116,12 @@ impl ShuuroPosition {
     #[wasm_bindgen]
     pub fn make_move(&mut self, game_move: String) -> String {
         self.shuuro.make_move(game_move)
+    }
+
+    /// Get last move data
+    #[wasm_bindgen]
+    pub fn last_move_data(&self) -> u8 {
+        self.shuuro.last_move_data()
     }
 
     #[wasm_bindgen]

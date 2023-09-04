@@ -170,4 +170,9 @@ impl PositionContainer {
     pub fn make_move(&mut self, game_move: String) -> String {
         local_position!(self, make_move, game_move, false, false)
     }
+
+    #[inline]
+    pub fn last_move_data(&self) -> u8 {
+        local_position!(self, last_move_data)
+    }
 }

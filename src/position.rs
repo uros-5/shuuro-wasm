@@ -22,7 +22,7 @@ impl ShuuroPosition {
 
     /// Change game variant
     #[wasm_bindgen]
-    pub fn change_variant(&mut self, s: &str) {
+    pub fn change_variant(&mut self, s: u8) {
         self.shuuro.change_variant(s);
     }
 
@@ -47,7 +47,7 @@ impl ShuuroPosition {
     /// Get side to move.
     #[wasm_bindgen]
     pub fn side_to_move(&self) -> String {
-        self.shuuro.side_to_move()
+        self.shuuro.side_to_move().to_string()
     }
 
     /// All plinths on board.
@@ -100,7 +100,7 @@ impl ShuuroPosition {
 
     /// Place piece on board.
     #[wasm_bindgen]
-    pub fn place(&mut self, game_move: String) -> bool {
+    pub fn place(&mut self, game_move: String) -> Option<String> {
         self.shuuro.place(game_move)
     }
 
@@ -108,20 +108,14 @@ impl ShuuroPosition {
 
     /// All legal moves for square.
     #[wasm_bindgen]
-    pub fn legal_moves(&self, color: &str) -> Map {
+    pub fn legal_moves(&self, color: u8) -> Map {
         self.shuuro.legal_moves(color)
     }
 
     /// Get move from server and play
     #[wasm_bindgen]
-    pub fn make_move(&mut self, game_move: String) -> String {
+    pub fn make_move(&mut self, game_move: String) -> Option<String> {
         self.shuuro.make_move(game_move)
-    }
-
-    /// Get last move data
-    #[wasm_bindgen]
-    pub fn last_move_data(&self) -> u8 {
-        self.shuuro.last_move_data()
     }
 
     #[wasm_bindgen]

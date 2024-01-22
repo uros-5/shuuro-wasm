@@ -10,7 +10,7 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 #[wasm_bindgen]
 #[derive(Default)]
 pub struct ShuuroShop {
-    shuuro: shuuro::Shop<Square12>,
+    shuuro: shuuro::Selection<Square12>,
 }
 
 #[wasm_bindgen]
@@ -18,13 +18,13 @@ impl ShuuroShop {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         ShuuroShop {
-            shuuro: shuuro::Shop::default(),
+            shuuro: shuuro::Selection::default(),
         }
     }
 
     #[wasm_bindgen]
-    pub fn change_variant(&mut self, variant: String) {
-        let variant = Variant::from(&variant);
+    pub fn change_variant(&mut self, variant: u8) {
+        let variant = Variant::from(variant);
         self.shuuro.update_variant(variant);
     }
 
@@ -37,7 +37,7 @@ impl ShuuroShop {
     #[wasm_bindgen]
     pub fn buy(&mut self, game_move: String) -> Uint8Array {
         if let Some(game_move) = Move::from_sfen(game_move.as_str()) {
-            if let Move::Buy { piece } = game_move {
+            if let Move::Select { piece } = game_move {
                 self.shuuro.play(game_move);
                 return self.js_shop_items(&piece.color);
             }
@@ -104,7 +104,7 @@ impl ShuuroShop {
         let mut current_state: [u8; 9] = [1, 0, 0, 0, 0, 0, 0, 0, 0];
         let iterator = PieceTypeIter::default();
         for i in iterator {
-            if !self.shuuro.variant().can_buy(&i) {
+            if !self.shuuro.variant().can_select(&i) {
                 continue;
             } else if i == PieceType::King {
                 array.set_index(0, current_state[0]);

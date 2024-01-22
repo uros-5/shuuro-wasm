@@ -4,7 +4,7 @@
 
 extern crate wasm_bindgen_test;
 use shuuro_wasm::position::ShuuroPosition;
-use shuuro_wasm::shop::ShuuroShop;
+use shuuro_wasm::selection::ShuuroShop;
 use wasm_bindgen_test::*;
 
 wasm_bindgen_test_configure!(run_in_browser);

@@ -3,8 +3,9 @@ use js_sys::Map;
 use shuuro::shuuro12::{
     attacks12::Attacks12, bitboard12::BB12, position12::P12, square12::Square12,
 };
+use shuuro::shuuro6::{attacks6::Attacks6, bitboard6::BB6, position6::P6, square6::Square6};
 use shuuro::shuuro8::{attacks8::Attacks8, bitboard8::BB8, position8::P8, square8::Square8};
-use shuuro::Variant;
+use shuuro::{Color, Variant};
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
@@ -21,6 +22,10 @@ macro_rules! local_position {
             Variant::Standard | Variant::StandardFairy => {
                 $self.local8.as_mut().unwrap().$method($param)
             }
+
+            Variant::ShuuroMini | Variant::ShuuroMiniFairy => {
+                $self.local6.as_mut().unwrap().$method($param)
+            }
             _ => $self.local12.as_mut().unwrap().$method($param),
         }
     };
@@ -29,6 +34,10 @@ macro_rules! local_position {
             Variant::Standard | Variant::StandardFairy => {
                 $self.local8.as_mut().unwrap().$method($param)
             }
+
+            Variant::ShuuroMini | Variant::ShuuroMiniFairy => {
+                $self.local6.as_mut().unwrap().$method($param)
+            }
             _ => $self.local12.as_mut().unwrap().$part($param),
         }
     };
@@ -36,6 +45,10 @@ macro_rules! local_position {
     ($self: ident, $method: ident) => {
         match $self.variant {
             Variant::Standard | Variant::StandardFairy => $self.local8.as_ref().unwrap().$method(),
+            Variant::ShuuroMini | Variant::ShuuroMiniFairy => {
+                $self.local6.as_ref().unwrap().$method()
+            }
+
             _ => $self.local12.as_ref().unwrap().$method(),
         }
     };
@@ -44,6 +57,10 @@ macro_rules! local_position {
         match $self.variant {
             Variant::Standard | Variant::StandardFairy => {
                 $self.local8.as_ref().unwrap().$method($param)
+            }
+
+            Variant::ShuuroMini | Variant::ShuuroMiniFairy => {
+                $self.local6.as_ref().unwrap().$method($param)
             }
             _ => $self.local12.as_ref().unwrap().$method($param),
         }
@@ -64,9 +81,17 @@ type Local12 = LocalPosition<
     P12<Square12, BB12<Square12>>,
 >;
 
+type Local6 = LocalPosition<
+    Square6,
+    BB6<Square6>,
+    Attacks6<Square6, BB6<Square6>>,
+    P6<Square6, BB6<Square6>>,
+>;
+
 pub struct PositionContainer {
     local8: Option<Local8>,
     local12: Option<Local12>,
+    local6: Option<Local6>,
     variant: Variant,
 }
 
@@ -78,17 +103,25 @@ impl PositionContainer {
                 local8: Some(Local8::new()),
                 local12: None,
                 variant,
+                local6: None,
+            },
+            Variant::ShuuroMini | Variant::ShuuroMiniFairy => Self {
+                local8: None,
+                local12: None,
+                variant,
+                local6: Some(Local6::new()),
             },
             _ => Self {
                 local12: Some(Local12::new()),
                 local8: None,
                 variant,
+                local6: None,
             },
         }
     }
 
     #[inline]
-    pub fn change_variant(&mut self, variant: &str) {
+    pub fn change_variant(&mut self, variant: u8) {
         local_position!(self, change_variant, variant, true, true);
     }
 
@@ -152,7 +185,7 @@ impl PositionContainer {
         local_position!(self, place_moves, piece, false, false)
     }
 
-    pub fn place(&mut self, game_move: String) -> bool {
+    pub fn place(&mut self, game_move: String) -> Option<String> {
         local_position!(self, place, game_move, false, false)
     }
 
@@ -162,17 +195,13 @@ impl PositionContainer {
     }
 
     #[inline]
-    pub fn legal_moves(&self, color: &str) -> Map {
+    pub fn legal_moves(&self, color: u8) -> Map {
+        let color = Color::from(color as usize);
         local_position!(self, legal_moves, color)
     }
 
     #[inline]
-    pub fn make_move(&mut self, game_move: String) -> String {
+    pub fn make_move(&mut self, game_move: String) -> Option<String> {
         local_position!(self, make_move, game_move, false, false)
-    }
-
-    #[inline]
-    pub fn last_move_data(&self) -> u8 {
-        local_position!(self, last_move_data)
     }
 }

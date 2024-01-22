@@ -6,12 +6,7 @@ use shuuro::{
 };
 use wasm_bindgen::JsValue;
 
-use std::{
-    hash::Hash,
-    marker::PhantomData,
-    ops::{BitAnd, BitOr, BitOrAssign, Not},
-    panic,
-};
+use std::{hash::Hash, marker::PhantomData, panic};
 
 #[derive(Clone, Copy)]
 pub struct LocalPosition<S, B, A, P>
@@ -20,13 +15,6 @@ where
     B: BitBoard<S>,
     A: Attacks<S, B>,
     P: Position<S, B, A>,
-
-    for<'a> &'a B: BitOr<&'a B, Output = B>,
-    for<'a> &'a B: BitAnd<&'a B, Output = B>,
-    for<'a> &'a B: Not<Output = B>,
-    for<'a> &'a B: BitOr<&'a S, Output = B>,
-    for<'a> &'a B: BitAnd<&'a S, Output = B>,
-    for<'a> B: BitOrAssign<&'a S>,
 {
     _s: PhantomData<S>,
     _b: PhantomData<B>,
@@ -41,13 +29,6 @@ where
     B: BitBoard<S>,
     A: Attacks<S, B>,
     P: Position<S, B, A>,
-
-    for<'a> &'a B: BitOr<&'a B, Output = B>,
-    for<'a> &'a B: BitAnd<&'a B, Output = B>,
-    for<'a> &'a B: Not<Output = B>,
-    for<'a> &'a B: BitOr<&'a S, Output = B>,
-    for<'a> &'a B: BitAnd<&'a S, Output = B>,
-    for<'a> B: BitOrAssign<&'a S>,
 {
     pub fn new() -> Self {
         A::init();
@@ -61,8 +42,8 @@ where
     }
     // Main functions.
 
-    pub fn change_variant(&mut self, s: &str) {
-        self.state.update_variant(Variant::from(&String::from(s)));
+    pub fn change_variant(&mut self, variant: u8) {
+        self.state.update_variant(Variant::from(variant));
     }
 
     pub fn set_hand(&mut self, s: &str) {
@@ -107,7 +88,7 @@ where
         let colors = [Color::White, Color::Black];
         for i in colors {
             let bb = self.state.player_bb(i);
-            let color = self.get_color(&i.to_string());
+            let color = self.get_color(i);
             for sq in bb {
                 let piece = self.state.piece_at(sq);
                 if let Some(piece) = piece {
@@ -136,26 +117,17 @@ where
 
     pub fn last_move(&self) -> String {
         let history = self.state.get_sfen_history();
-        let m = history.last();
-        if let Some(mv) = m {
-            let mv = mv.to_string();
-            {
-                let _x = m;
-            };
-            mv
-        } else {
-            String::new()
-        }
+        history.first().2
     }
 
     pub fn is_check(&self) -> bool {
         self.state.in_check(self.state.side_to_move())
     }
 
-    fn get_color(&self, c: &String) -> &str {
-        if c == "w" {
+    fn get_color(&self, c: Color) -> &str {
+        if c == Color::White {
             return "white";
-        } else if c == "b" {
+        } else if c == Color::Black {
             return "black";
         }
         "none"
@@ -166,7 +138,7 @@ where
     pub fn place_moves(&mut self, piece: char) -> Map {
         let map = Map::new();
         if let Some(p) = Piece::from_sfen(piece) {
-            let bb = self.state.empty_squares(p);
+            let bb = self.state.empty_squares(p).unwrap_or_default();
             let moves = Array::new();
             for i in bb {
                 moves.push(&JsValue::from_str(&i.to_string()));
@@ -188,25 +160,23 @@ where
         b
     }
 
-    pub fn place(&mut self, game_move: String) -> bool {
+    pub fn place(&mut self, game_move: String) -> Option<String> {
         let m = Move::from_sfen(&game_move);
-        let past_length = self.state.get_sfen_history().len();
         #[allow(clippy::collapsible_match)]
         if let Some(m) = m {
             if let Move::Put { to, piece, .. } = m {
-                self.state.place(piece, to);
+                return self.state.place(piece, to);
             }
         }
-        let current_length = self.state.get_sfen_history().len();
-        current_length > past_length
+        None
     }
 
-    pub fn legal_moves(&self, color: &str) -> Map {
+    pub fn legal_moves(&self, color: Color) -> Map {
         panic::set_hook(Box::new(console_error_panic_hook::hook));
         let map = Map::new();
         let stm = self.state.side_to_move();
-        if color == stm.to_string() {
-            let l_m = self.state.legal_moves(&stm);
+        if color == stm {
+            let l_m = self.state.legal_moves(stm);
             for m in l_m {
                 let piece = m.0.to_string();
                 let moves = Array::new();
@@ -222,37 +192,13 @@ where
         map
     }
 
-    pub fn make_move(&mut self, game_move: String) -> String {
+    pub fn make_move(&mut self, game_move: String) -> Option<String> {
         #[allow(clippy::collapsible_match)]
-        if let Some(m) = Move::<S>::from_sfen(game_move.as_str()) {
-            if let Move::Normal { from, to, .. } = m {
-                let res = self
-                    .state
-                    .play(from.to_string().as_str(), to.to_string().as_str());
-                let res = match res {
-                    Ok(i) => i.to_string(),
-                    Err(_) => String::from("illegal_move"),
-                };
-                return res;
-            }
+        let output = self.state.play(&game_move);
+        match output {
+            Ok(_) => Some(self.state.get_sfen_history().first().2),
+            Err(_) => None,
         }
-        String::from("")
-    }
-
-    pub fn last_move_data(&self) -> u8 {
-        let last = self.state.move_history().last();
-        let mut data = 0;
-        if let Some(m) = last {
-            let formatted = m.format();
-            if formatted.contains('=') {
-                data = 1;
-            } else if formatted.contains('+') {
-                data = 2;
-            } else if formatted.contains('#') {
-                data = 3
-            }
-        }
-        data
     }
 }
 

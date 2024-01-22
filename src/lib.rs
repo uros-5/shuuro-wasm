@@ -1,7 +1,7 @@
 mod local_position;
 pub mod position;
 mod position_container;
-pub mod shop;
+pub mod selection;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.

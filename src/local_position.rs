@@ -6,12 +6,7 @@ use shuuro::{
 };
 use wasm_bindgen::JsValue;
 
-use std::{
-    hash::Hash,
-    marker::PhantomData,
-    ops::{BitAnd, BitOr, BitOrAssign, Not},
-    panic,
-};
+use std::{hash::Hash, marker::PhantomData, panic};
 
 #[derive(Clone, Copy)]
 pub struct LocalPosition<S, B, A, P>
@@ -20,13 +15,6 @@ where
     B: BitBoard<S>,
     A: Attacks<S, B>,
     P: Position<S, B, A>,
-
-    for<'a> &'a B: BitOr<&'a B, Output = B>,
-    for<'a> &'a B: BitAnd<&'a B, Output = B>,
-    for<'a> &'a B: Not<Output = B>,
-    for<'a> &'a B: BitOr<&'a S, Output = B>,
-    for<'a> &'a B: BitAnd<&'a S, Output = B>,
-    for<'a> B: BitOrAssign<&'a S>,
 {
     _s: PhantomData<S>,
     _b: PhantomData<B>,
@@ -41,13 +29,6 @@ where
     B: BitBoard<S>,
     A: Attacks<S, B>,
     P: Position<S, B, A>,
-
-    for<'a> &'a B: BitOr<&'a B, Output = B>,
-    for<'a> &'a B: BitAnd<&'a B, Output = B>,
-    for<'a> &'a B: Not<Output = B>,
-    for<'a> &'a B: BitOr<&'a S, Output = B>,
-    for<'a> &'a B: BitAnd<&'a S, Output = B>,
-    for<'a> B: BitOrAssign<&'a S>,
 {
     pub fn new() -> Self {
         A::init();

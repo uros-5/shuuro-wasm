@@ -1,6 +1,6 @@
 [package]
 name = "shuuro-wasm"
-version = "0.2.6"
+version = "0.3.3"
 authors = ["uros-5"]
 edition = "2021"
 description = "Library for shuuro-wasm on client part."
